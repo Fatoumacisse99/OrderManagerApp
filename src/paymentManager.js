@@ -1,6 +1,4 @@
 const pool = require("./db");
-
-// Fonction pour obtenir tous les paiements
 async function getPayments() {
   const connection = await pool.getConnection();
   try {
@@ -13,10 +11,19 @@ async function getPayments() {
     connection.release();
   }
 }
-
-// Fonction pour ajouter un paiement
+async function orderExists(orderId) {
+  const connection = await pool.getConnection();
+  try {
+    const [rows] = await connection.execute("SELECT 1 FROM purchase_orders WHERE id = ?", [orderId]);
+    return rows.length > 0;
+  } catch (error) {
+    console.error("Erreur lors de la vérification de l'existence de la commande :", error.message);
+    throw new Error("Erreur lors de la vérification de l'existence de la commande.");
+  } finally {
+    connection.release();
+  }
+}
 async function addPayment(order_id, date, amount, payment_method, status) {
-  // Validation des données
   if (!order_id || !date || !amount || !payment_method || !status) {
     throw new Error("Tous les champs (order_id, date, amount, payment_method, status) sont obligatoires.");
   }
@@ -25,6 +32,9 @@ async function addPayment(order_id, date, amount, payment_method, status) {
   }
   if (isNaN(Date.parse(date))) {
     throw new Error("La date fournie n'est pas valide.");
+  }
+  if (!(await orderExists(order_id))) {
+    throw new Error("Erreur : l'ID de la commande spécifié n'existe pas.");
   }
 
   const connection = await pool.getConnection();
@@ -41,10 +51,7 @@ async function addPayment(order_id, date, amount, payment_method, status) {
     connection.release();
   }
 }
-
-// Fonction pour mettre à jour un paiement
 async function updatePayment(id, order_id, date, amount, payment_method, status) {
-  // Validation des données
   if (!order_id || !date || !amount || !payment_method || !status) {
     throw new Error("Tous les champs (order_id, date, amount, payment_method, status) sont obligatoires.");
   }
@@ -54,10 +61,11 @@ async function updatePayment(id, order_id, date, amount, payment_method, status)
   if (isNaN(Date.parse(date))) {
     throw new Error("La date fournie n'est pas valide.");
   }
-
-  // Vérifier si le paiement existe
   if (!(await paymentExists(id))) {
     throw new Error(`Erreur : le paiement avec l'ID ${id} n'existe pas.`);
+  }
+  if (!(await orderExists(order_id))) {
+    throw new Error("Erreur : l'ID de la commande spécifié n'existe pas.");
   }
 
   const connection = await pool.getConnection();
@@ -77,10 +85,7 @@ async function updatePayment(id, order_id, date, amount, payment_method, status)
     connection.release();
   }
 }
-
-// Fonction pour supprimer un paiement
 async function deletePayment(id) {
-  // Vérifier si le paiement existe
   if (!(await paymentExists(id))) {
     throw new Error(`Erreur : le paiement avec l'ID ${id} n'existe pas.`);
   }
@@ -102,8 +107,6 @@ async function deletePayment(id) {
     connection.release();
   }
 }
-
-// Fonction utilitaire pour vérifier l'existence d'un paiement
 async function paymentExists(id) {
   const connection = await pool.getConnection();
   try {

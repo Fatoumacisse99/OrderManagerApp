@@ -1,6 +1,4 @@
 const pool = require("./db");
-
-// Fonction pour obtenir tous les produits
 async function getProducts() {
   const connection = await pool.getConnection();
   try {
@@ -13,12 +11,12 @@ async function getProducts() {
     connection.release();
   }
 }
-
-// Fonction pour ajouter un produit
 async function addProduct(name, description, price, stock, category, barcode, status) {
-  // Validation des données
-  if (!name || !price || !stock) {
+  if (!name || price === undefined || stock === undefined) {
     throw new Error("Les champs nom, prix et stock sont obligatoires.");
+  }
+  if (isNaN(price) || isNaN(stock)) {
+    throw new Error("Le prix et la quantité en stock doivent être des nombres.");
   }
   if (price <= 0 || stock < 0) {
     throw new Error("Le prix doit être supérieur à zéro et le stock ne peut pas être négatif.");
@@ -38,12 +36,13 @@ async function addProduct(name, description, price, stock, category, barcode, st
     connection.release();
   }
 }
-
-// Fonction pour mettre à jour un produit
 async function updateProduct(id, name, description, price, stock, category, barcode, status) {
   // Validation des données
-  if (!name || !price || !stock) {
+  if (!name || price === undefined || stock === undefined) {
     throw new Error("Les champs nom, prix et stock sont obligatoires.");
+  }
+  if (isNaN(price) || isNaN(stock)) {
+    throw new Error("Le prix et la quantité en stock doivent être des nombres.");
   }
   if (price <= 0 || stock < 0) {
     throw new Error("Le prix doit être supérieur à zéro et le stock ne peut pas être négatif.");
@@ -66,8 +65,6 @@ async function updateProduct(id, name, description, price, stock, category, barc
     connection.release();
   }
 }
-
-// Fonction pour supprimer un produit
 async function destroyProduct(id) {
   if (!id) {
     throw new Error("ID obligatoire pour supprimer un produit.");

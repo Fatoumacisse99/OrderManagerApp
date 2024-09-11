@@ -18,6 +18,17 @@ async function addCustomer(name, email, phone, address) {
   if (!name || !email || !phone || !address) {
     throw new Error("Tous les champs (nom, email, téléphone, adresse) sont obligatoires.");
   }
+  // Validation de l'email
+  const emailRegex = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/;
+  if (!emailRegex.test(email)) {
+    throw new Error("Erreur : l'adresse e-mail n'est pas valide.");
+  }
+
+  // Validation du numéro de téléphone
+  const phoneRegex = /^[0-9\-\+\(\)\s]+$/;
+  if (!phoneRegex.test(phone)) {
+    throw new Error("Erreur : le numéro de téléphone n'est pas valide.");
+  }
 
   const connection = await pool.getConnection();
   try {
@@ -45,6 +56,17 @@ async function updateCustomer(id, name, email, phone, address) {
   // Vérifier si l'ID du client existe
   if (!(await customerExists(id))) {
     throw new Error(`Erreur : l'ID ${id} que vous tentez de mettre à jour n'existe pas.`);
+  }
+  // Validation de l'email
+  const emailRegex = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/;
+  if (!emailRegex.test(email)) {
+    throw new Error("Erreur : l'adresse e-mail n'est pas valide.");
+  }
+
+  // Validation du numéro de téléphone
+  const phoneRegex = /^[0-9\-\+\(\)\s]+$/;
+  if (!phoneRegex.test(phone)) {
+    throw new Error("Erreur : le numéro de téléphone n'est pas valide.");
   }
 
   const connection = await pool.getConnection();
