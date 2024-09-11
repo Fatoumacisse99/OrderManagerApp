@@ -3,7 +3,7 @@ const productModule = require("./productManager");
 const customerModule = require("./customerManager");
 const paymentModule = require("./paymentManager");
 const orderModule = require("./orderManager");
-const orderDetailModule = require("./orderDetailManager");
+// const orderDetailModule = require("./orderDetailManager");
 const readlineSync = require("readline-sync");
 
 async function main() {
@@ -14,7 +14,7 @@ async function main() {
     console.log("2 Gestion des clients");
     console.log("3 Gestion des paiements");
     console.log("4 Gestion des commandes");
-    console.log("5 Gestion des détails de commandes");
+    // console.log("5 Gestion des détails de commandes");
     console.log("0 Quitter");
 
     choix = readlineSync.question("Votre choix : ");
@@ -32,9 +32,9 @@ async function main() {
       case "4":
         await orderMenu();
         break;
-      case "5":
-        await orderDetailMenu();
-        break;
+      // case "5":
+      //   await orderDetailMenu();
+      //   break;
       case "0":
         console.log("Sortie du programme...");
         break;
@@ -44,8 +44,6 @@ async function main() {
     }
   } while (choix !== "0");
 }
-
-// Sous-menu pour la gestion des produits
 async function productMenu() {
   let choix;
   do {
@@ -79,8 +77,6 @@ async function productMenu() {
     }
   } while (choix !== "0");
 }
-
-// Sous-menu pour la gestion des clients
 async function customerMenu() {
   let choix;
   do {
@@ -114,8 +110,6 @@ async function customerMenu() {
     }
   } while (choix !== "0");
 }
-
-// Sous-menu pour la gestion des paiements
 async function paymentMenu() {
   let choix;
   do {
@@ -149,8 +143,6 @@ async function paymentMenu() {
     }
   } while (choix !== "0");
 }
-
-// Sous-menu pour la gestion des commandes
 async function orderMenu() {
   let choix;
   do {
@@ -159,6 +151,10 @@ async function orderMenu() {
     console.log("2 Lister toutes les commandes");
     console.log("3 Mettre à jour une commande");
     console.log("4 Supprimer une commande");
+    console.log("5 Ajouter un détail de commande");
+    console.log("6 Lister tous les détails de commandes");
+    console.log("7 Mettre à jour un détail de commande");
+    console.log("8 Supprimer un détail de commande");
     console.log("0 Retour");
 
     choix = readlineSync.question("Votre choix : ");
@@ -176,39 +172,16 @@ async function orderMenu() {
       case "4":
         await deleteOrder();
         break;
-      case "0":
-        break;
-      default:
-        console.log("Cette option est invalide");
-        break;
-    }
-  } while (choix !== "0");
-}
-
-// Sous-menu pour la gestion des détails de commandes
-async function orderDetailMenu() {
-  let choix;
-  do {
-    console.log("\nGestion des détails de commandes");
-    console.log("1 Ajouter un détail de commande");
-    console.log("2 Lister tous les détails de commandes");
-    console.log("3 Mettre à jour un détail de commande");
-    console.log("4 Supprimer un détail de commande");
-    console.log("0 Retour");
-
-    choix = readlineSync.question("Votre choix : ");
-
-    switch (choix) {
-      case "1":
+      case "5":
         await addOrderDetail();
         break;
-      case "2":
+      case "6":
         await listOrderDetails();
         break;
-      case "3":
+      case "7":
         await updateOrderDetail();
         break;
-      case "4":
+      case "8":
         await deleteOrderDetail();
         break;
       case "0":
@@ -223,7 +196,7 @@ async function addProduct() {
   try {
     const name = readlineSync.question("Entrez le nom du produit : ");
     const description = readlineSync.question("Entrez la description du produit : ");
-    const price = parseFloat(readlineSync.question("Entrez le prix du produit : "));
+    const price = parseFloat(readlineSync.question("Entrez le prix du produit : "));a
     const stock = parseInt(readlineSync.question("Entrez la quantité en stock : "), 10);
     const category = readlineSync.question("Entrez la catégorie du produit : ");
     const barcode = readlineSync.question("Entrez le code-barres du produit : ");
@@ -242,20 +215,15 @@ async function addProduct() {
 
 async function listProducts() {
   try {
-    // Récupération des produits à partir du module
     const products = await productModule.getProducts();
-
-    // Vérifie si la liste des produits est vide
     if (products.length === 0) {
       console.log("Aucun produit trouvé.");
     } else {
-      // Affiche chaque produit de la liste
       for (let product of products) {
         console.log(`id: ${product.id}, Nom: ${product.name}, Prix: ${product.price}`);
       }
     }
   } catch (error) {
-    // Affiche un message d'erreur en cas de problème
     console.error("Erreur lors de la récupération des produits :", error.message);
   }
 }
@@ -457,64 +425,78 @@ async function deletePayment() {
     console.error("Erreur lors de la suppression du paiement :", error.message);
   }
 }
+// Fonction pour ajouter une commande
 async function addOrder() {
   try {
     const date = readlineSync.question("Entrez la date de la commande (YYYY-MM-DD) : ");
-    const customerId = readlineSync.question("Entrez l'ID du client : ");
-    const deliveryAddress = readlineSync.question("Entrez l'adresse de livraison : ");
-    const trackNumber = readlineSync.question("Entrez le numéro de suivi : ");
+    const customer_id = readlineSync.question("Entrez l'ID du client : ");
+    const delivery_address = readlineSync.question("Entrez l'adresse de livraison : ");
+    const track_number = readlineSync.question("Entrez le numéro de suivi : ");
     const status = readlineSync.question("Entrez le statut de la commande : ");
 
-    await orderModule.addOrder(date, customerId, deliveryAddress, trackNumber, status);
-    console.log("Commande ajoutée avec succès !");
+    if (isNaN(Date.parse(date))) {
+      throw new Error("La date fournie n'est pas valide.");
+    }
+
+    const orderId = await orderModule.addOrder(date, customer_id, delivery_address, track_number, status);
+    console.log(`Commande ajoutée avec succès ! ID de la commande : ${orderId}`);
   } catch (error) {
     console.error("Erreur lors de l'ajout de la commande :", error.message);
   }
 }
 
+// Fonction pour lister toutes les commandes
 async function listOrders() {
   try {
     const orders = await orderModule.getOrders();
     console.log("Liste des commandes :");
-    orders.forEach((order) => {
-      console.log(
-        `ID: ${order.id}, Date: ${order.date}, Client ID: ${order.customer_id}, Adresse de livraison: ${order.delivery_address}, Numéro de suivi: ${order.track_number}, Statut: ${order.status}`
-      );
+    orders.forEach(order => {
+      console.log(`ID: ${order.id}, Date: ${order.date}, Client ID: ${order.customer_id}, Adresse de livraison: ${order.delivery_address}, Numéro de suivi: ${order.track_number}, Statut: ${order.status}`);
     });
   } catch (error) {
     console.error("Erreur lors de la liste des commandes :", error.message);
   }
 }
 
+// Fonction pour mettre à jour une commande
 async function updateOrder() {
   try {
     const id = readlineSync.question("Entrez l'ID de la commande à mettre à jour : ");
     const date = readlineSync.question("Entrez la nouvelle date de la commande (YYYY-MM-DD) : ");
-    const customerId = readlineSync.question("Entrez le nouvel ID du client : ");
-    const deliveryAddress = readlineSync.question("Entrez la nouvelle adresse de livraison : ");
-    const trackNumber = readlineSync.question("Entrez le nouveau numéro de suivi : ");
+    const customer_id = readlineSync.question("Entrez le nouvel ID du client : ");
+    const delivery_address = readlineSync.question("Entrez la nouvelle adresse de livraison : ");
+    const track_number = readlineSync.question("Entrez le nouveau numéro de suivi : ");
     const status = readlineSync.question("Entrez le nouveau statut de la commande : ");
 
-    await orderModule.updateOrder(id, date, customerId, deliveryAddress, trackNumber, status);
-    console.log("Commande mise à jour avec succès !");
+    if (isNaN(Date.parse(date))) {
+      throw new Error("La date fournie n'est pas valide.");
+    }
+
+    const affectedRows = await orderModule.updateOrder(id, date, customer_id, delivery_address, track_number, status);
+    if (affectedRows > 0) {
+      console.log("Commande mise à jour avec succès !");
+    } else {
+      console.log(`Aucune commande trouvée avec l'ID ${id}.`);
+    }
   } catch (error) {
     console.error("Erreur lors de la mise à jour de la commande :", error.message);
   }
 }
 
+// Fonction pour supprimer une commande
 async function deleteOrder() {
   try {
     const id = readlineSync.question("Entrez l'ID de la commande à supprimer : ");
-    await orderModule.deleteOrder(id);
-    console.log("Commande supprimée avec succès !");
+    const affectedRows = await orderModule.deleteOrder(id);
+    if (affectedRows > 0) {
+      console.log("Commande supprimée avec succès !");
+    } else {
+      console.log(`Aucune commande trouvée avec l'ID ${id}.`);
+    }
   } catch (error) {
     console.error("Erreur lors de la suppression de la commande :", error.message);
   }
-
 }
-
-
-
 
 // Fonction pour ajouter un détail de commande
 async function addOrderDetail() {
@@ -526,20 +508,21 @@ async function addOrderDetail() {
     if (isNaN(quantity)) {
       throw new Error("La quantité doit être un nombre.");
     }
-    await orderDetailModule.addOrderDetail(orderId, productId, quantity);
-    console.log("Détail de commande ajouté avec succès !");
+
+    const orderDetailId = await orderModule.addOrderDetail(orderId, productId, quantity);
+    console.log(`Détail de commande ajouté avec succès ! ID du détail : ${orderDetailId}`);
   } catch (error) {
     console.error("Erreur lors de l'ajout du détail de commande :", error.message);
   }
 }
 
-// Fonction pour lister les détails de commandes
+// Fonction pour lister tous les détails de commandes
 async function listOrderDetails() {
   try {
-    const details = await orderDetailModule.getOrderDetails();
+    const orderDetails = await orderModule.getOrderDetails();
     console.log("Liste des détails de commandes :");
-    details.forEach((detail) => {
-      console.log(`ID: ${detail.id}, ID Commande: ${detail.order_id}, ID Produit: ${detail.product_id}, Quantité: ${detail.quantity}`);
+    orderDetails.forEach(detail => {
+      console.log(`ID: ${detail.id}, Commande ID: ${detail.order_id}, Produit ID: ${detail.product_id}, Quantité: ${detail.quantity}`);
     });
   } catch (error) {
     console.error("Erreur lors de la liste des détails de commandes :", error.message);
@@ -555,8 +538,8 @@ async function updateOrderDetail() {
     if (isNaN(quantity)) {
       throw new Error("La quantité doit être un nombre.");
     }
-    await orderDetailModule.updateOrderDetail(id, quantity);
-    console.log("Détail de commande mis à jour avec succès !");
+
+    await orderModule.updateOrderDetail(id, quantity);
   } catch (error) {
     console.error("Erreur lors de la mise à jour du détail de commande :", error.message);
   }
@@ -566,8 +549,7 @@ async function updateOrderDetail() {
 async function deleteOrderDetail() {
   try {
     const id = readlineSync.question("Entrez l'ID du détail de commande à supprimer : ");
-    await orderDetailModule.destroyOrderDetail(id);
-    console.log("Détail de commande supprimé avec succès !");
+    await orderModule.destroyOrderDetail(id);
   } catch (error) {
     console.error("Erreur lors de la suppression du détail de commande :", error.message);
   }
