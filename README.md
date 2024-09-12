@@ -33,8 +33,10 @@ ABC-Crud-App est une application console développée en Node.js pour gérer les
 
 ### Prérequis
 
-- Node.js (version 12 ou plus) installé sur votre machine.
-- MySQL installé et configuré.
+- [Node.js Official Website](https://nodejs.org/) installé node sur votre machine.
+**Configuration MariaDB via le terminal**
+- Installer XAMPP : Assurez-vous que XAMPP est installé avec MariaDB inclus. Vous pouvez le télécharger depuis [le site officiel de XAMPP](https://www.apachefriends.org/index.html).
+
 
 
 ### Installation
