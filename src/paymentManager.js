@@ -5,7 +5,10 @@ async function getPayments() {
     const [rows] = await connection.execute("SELECT * FROM payments");
     return rows;
   } catch (error) {
-    console.error("Erreur lors de la récupération des paiements :", error.message);
+    console.error(
+      "Erreur lors de la récupération des paiements :",
+      error.message
+    );
     throw new Error("Erreur lors de la récupération des paiements.");
   } finally {
     connection.release();
@@ -14,18 +17,28 @@ async function getPayments() {
 async function orderExists(orderId) {
   const connection = await pool.getConnection();
   try {
-    const [rows] = await connection.execute("SELECT 1 FROM purchase_orders WHERE id = ?", [orderId]);
+    const [rows] = await connection.execute(
+      "SELECT 1 FROM purchase_orders WHERE id = ?",
+      [orderId]
+    );
     return rows.length > 0;
   } catch (error) {
-    console.error("Erreur lors de la vérification de l'existence de la commande :", error.message);
-    throw new Error("Erreur lors de la vérification de l'existence de la commande.");
+    console.error(
+      "Erreur lors de la vérification de l'existence de la commande :",
+      error.message
+    );
+    throw new Error(
+      "Erreur lors de la vérification de l'existence de la commande."
+    );
   } finally {
     connection.release();
   }
 }
 async function addPayment(order_id, date, amount, payment_method, status) {
   if (!order_id || !date || !amount || !payment_method || !status) {
-    throw new Error("Tous les champs (order_id, date, amount, payment_method, status) sont obligatoires.");
+    throw new Error(
+      "Tous les champs (order_id, date, amount, payment_method, status) sont obligatoires."
+    );
   }
   if (amount <= 0) {
     throw new Error("Le montant doit être supérieur à zéro.");
@@ -51,9 +64,18 @@ async function addPayment(order_id, date, amount, payment_method, status) {
     connection.release();
   }
 }
-async function updatePayment(id, order_id, date, amount, payment_method, status) {
+async function updatePayment(
+  id,
+  order_id,
+  date,
+  amount,
+  payment_method,
+  status
+) {
   if (!order_id || !date || !amount || !payment_method || !status) {
-    throw new Error("Tous les champs (order_id, date, amount, payment_method, status) sont obligatoires.");
+    throw new Error(
+      "Tous les champs (order_id, date, amount, payment_method, status) sont obligatoires."
+    );
   }
   if (amount <= 0) {
     throw new Error("Le montant doit être supérieur à zéro.");
@@ -110,11 +132,19 @@ async function deletePayment(id) {
 async function paymentExists(id) {
   const connection = await pool.getConnection();
   try {
-    const [rows] = await connection.execute("SELECT 1 FROM payments WHERE id = ?", [id]);
+    const [rows] = await connection.execute(
+      "SELECT 1 FROM payments WHERE id = ?",
+      [id]
+    );
     return rows.length > 0;
   } catch (error) {
-    console.error("Erreur lors de la vérification de l'existence du paiement :", error.message);
-    throw new Error("Erreur lors de la vérification de l'existence du paiement.");
+    console.error(
+      "Erreur lors de la vérification de l'existence du paiement :",
+      error.message
+    );
+    throw new Error(
+      "Erreur lors de la vérification de l'existence du paiement."
+    );
   } finally {
     connection.release();
   }

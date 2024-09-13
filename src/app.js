@@ -1,9 +1,10 @@
-
 const productModule = require("./productManager");
 const customerModule = require("./customerManager");
 const paymentModule = require("./paymentManager");
 const orderModule = require("./orderManager");
 const readlineSync = require("readline-sync");
+let commande = null;
+let detailsCommande = [];
 
 async function main() {
   let choix;
@@ -181,22 +182,51 @@ async function addOrderWithDetails() {
     const date = readlineSync.question(
       "Entrez la date de la commande (YYYY-MM-DD) : "
     );
-    const customer_id = readlineSync.question("ID du client: ");
+    let customer_id = readlineSync.question("ID du client: ");
+    // const customerExist = await customerModule.customerExists(customer_id);
+
+    // if (!customerExist) {
+    //   console.log("id client n'existe pas dans la base de donnée ");
+
+    // } else {
     const delivery_address = readlineSync.question("Adresse de livraison: ");
     const track_number = readlineSync.question("Numéro de suivi: ");
     const status = readlineSync.question("Statut de la commande: ");
-    const orderId = await orderModule.addOrder(
+    if (
+      !date ||
+      !customer_id ||
+      !delivery_address ||
+      !track_number ||
+      !status
+    ) {
+      throw new Error(
+        "Tous les champs (date, customer_id, delivery_address, track_number, status) sont obligatoires."
+      );
+    }
+    // }
+    if (isNaN(Date.parse(date))) {
+      throw new Error("La date fournie n'est pas valide.");
+    }
+    // const orderId = await orderModule.addOrder(
+    //   date,
+    //   customer_id,
+    //   delivery_address,
+    //   track_number,
+    //   status
+    // );
+    // console.log(
+    //   `Commande ajoutée avec succès ! ID de la commande : ${orderId}`
+    // );
+    commande = {
       date,
       customer_id,
       delivery_address,
       track_number,
-      status
-    );
-    console.log(
-      `Commande ajoutée avec succès ! ID de la commande : ${orderId}`
-    );
+      status,
+    };
+    console.log("Commande ajoutée en mémoire !");
 
-    await manageOrderDetails(orderId);
+    await manageOrderDetails();
   } catch (error) {
     console.error("Erreur lors de l'ajout de la commande :", error.message);
   }
@@ -204,21 +234,27 @@ async function addOrderWithDetails() {
 
 async function updateOrderWithDetails() {
   try {
-    
     const orderId = readlineSync.question(
       "Entrez l'ID de la commande à modifier : "
     );
-    const customerId = readlineSync.question(
+    const customer_id = readlineSync.question(
       "Entrez le nouvel ID du client : "
     );
-    const paymentId = readlineSync.question(
-      "Entrez le nouvel ID du paiement : "
-    );
+    const delivery_address = readlineSync.question("Entrez la nouvelle adresse de livraison: ");
     const date = readlineSync.question(
       "Entrez la nouvelle date de la commande (YYYY-MM-DD) : "
     );
+    const track_number = readlineSync.question("Nouveau numéro de suivi: ");
+    const status = readlineSync.question("Nouveau statut de la commande: ");
 
-    await orderModule.updateOrder(orderId, customerId, paymentId, date);
+    await orderModule.updateOrder(
+      orderId,
+      customer_id,
+      delivery_address,
+      date,
+      track_number,
+      status
+    );
     console.log("Commande modifiée avec succès !");
 
     await manageOrderDetails(orderId);
@@ -235,16 +271,14 @@ async function listOrderWithDetails() {
     const orderId = readlineSync.question(
       "Entrez l'ID de la commande à lister : "
     );
-    const order = await orderModule.getOrders(orderId);
-    const orderDetails = await orderModule.getOrderDetails(orderId);
+    const order = await orderModule.getOrderById(orderId);
+    const orderDetails = await orderModule.getOrderDetailById(orderId);
 
     console.log("\nCommande:");
     console.log(order);
 
     console.log("\nDétails de la commande:");
-    orderDetails.forEach((detail) => {
-      console.log(detail);
-    });
+    console.log(orderDetails);
   } catch (error) {
     console.error("Erreur lors de la liste de la commande :", error.message);
   }
@@ -283,9 +317,13 @@ async function manageOrderDetails(orderId) {
         await addOrderDetails(orderId);
         break;
       case "2":
-        console.log("Détails de la commande sauvegardés !");
+        await sauvegarderCommandeEtDetails();
+        // console.log("Détails de la commande sauvegardés !");
         break;
       case "0":
+        commande = null;
+        detailsCommande = [];
+        console.log("Quitter sans sauvegarder.");
         break;
       default:
         console.log("Cette option est invalide");
@@ -307,9 +345,11 @@ async function addOrderDetails(orderId) {
       if (isNaN(quantity)) {
         throw new Error("La quantité doit être un nombre.");
       }
+      detailsCommande.push({ productId, quantity });
+      console.log("Détail de commande ajouté en mémoire !");
 
-      await orderModule.addOrderDetail(orderId, productId, quantity);
-      console.log("Détail de commande ajouté avec succès !");
+      // await orderModule.addOrderDetail(orderId, productId, quantity);
+      // console.log("Détail de commande ajouté avec succès !");
 
       moreProducts = readlineSync.keyInYNStrict("Ajouter un autre produit ?");
     } catch (error) {
@@ -318,6 +358,41 @@ async function addOrderDetails(orderId) {
         error.message
       );
     }
+  }
+}
+async function sauvegarderCommandeEtDetails() {
+  try {
+    if (!commande || detailsCommande.length === 0) {
+      console.log("Aucune commande ou aucun détail à sauvegarder.");
+      return;
+    }
+
+    // Insérer la commande dans la base de données
+    const orderId = await orderModule.addOrder(
+      commande.date,
+      commande.customer_id,
+      commande.delivery_address,
+      commande.track_number,
+      commande.status
+    );
+
+    // Insérer les détails dans la base de données
+    for (const detail of detailsCommande) {
+      await orderModule.addOrderDetail(
+        orderId,
+        detail.productId,
+        detail.quantity
+      );
+    }
+
+    console.log(
+      "Commande et détails sauvegardés avec succès dans la base de données !"
+    );
+    // Réinitialiser les données après sauvegarde
+    commande = null;
+    detailsCommande = [];
+  } catch (error) {
+    // console.error("Erreur lors de la sauvegarde :", error.message);
   }
 }
 
@@ -375,25 +450,25 @@ async function updateProduct() {
       "Entrez l'ID du produit à modifier : "
     );
     const name = readlineSync.question(
-      "Entrez le nouveau nom du produit (laisser vide pour ne pas changer) : "
+      "Entrez le nouveau nom du produit : "
     );
     const description = readlineSync.question(
-      "Entrez la nouvelle description du produit (laisser vide pour ne pas changer) : "
+      "Entrez la nouvelle description du produit : "
     );
     const price = readlineSync.question(
-      "Entrez le nouveau prix du produit (laisser vide pour ne pas changer) : "
+      "Entrez le nouveau prix du produit : "
     );
     const stock = readlineSync.question(
-      "Entrez la nouvelle quantité en stock du produit (laisser vide pour ne pas changer) : "
+      "Entrez la nouvelle quantité en stock du produit : "
     );
     const category = readlineSync.question(
-      "Entrez la nouvelle catégorie du produit (laisser vide pour ne pas changer) : "
+      "Entrez la nouvelle catégorie du produit : "
     );
     const barcode = readlineSync.question(
-      "Entrez le nouveau code-barres du produit (laisser vide pour ne pas changer) : "
+      "Entrez le nouveau code-barres du produit : "
     );
     const status = readlineSync.question(
-      "Entrez le nouveau statut du produit (laisser vide pour ne pas changer) : "
+      "Entrez le nouveau statut du produit : "
     );
 
     await productModule.updateProduct(
@@ -458,16 +533,16 @@ async function updateCustomer() {
       "Entrez l'ID du client à modifier : "
     );
     const name = readlineSync.question(
-      "Entrez le nouveau nom du client (laisser vide pour ne pas changer) : "
+      "Entrez le nouveau nom du client : "
     );
     const email = readlineSync.question(
-      "Entrez le nouvel email du client (laisser vide pour ne pas changer) : "
+      "Entrez le nouvel email du client : "
     );
     const phone = readlineSync.question(
-      "Entrez le nouveau numéro de téléphone du client (laisser vide pour ne pas changer) : "
+      "Entrez le nouveau numéro de téléphone du client  : "
     );
     const address = readlineSync.question(
-      "Entrez la nouvelle adresse du client (laisser vide pour ne pas changer) : "
+      "Entrez la nouvelle adresse du client : "
     );
 
     await customerModule.updateCustomer(
@@ -497,19 +572,29 @@ async function deleteCustomer() {
 
 async function addPayment() {
   try {
-    const order_id = readlineSync.question('Entrez l\'ID de la commande: ');
-  const amount = readlineSync.question('Entrez le montant: ');
-  const payment_date = readlineSync.question('Entrez la date du paiement (YYYY-MM-DD): ');
-  
-  
-  
-  const payment_method = readlineSync.question('Entrez le mode de paiement (ex: carte, espèces): ');
-  const status = readlineSync.question('Entrez le statut du paiement (ex: payé, en attente): ');
+    const order_id = readlineSync.question("Entrez l'ID de la commande: ");
+    const amount = readlineSync.question("Entrez le montant: ");
+    const payment_date = readlineSync.question(
+      "Entrez la date du paiement (YYYY-MM-DD): "
+    );
+
+    const payment_method = readlineSync.question(
+      "Entrez le mode de paiement (ex: carte, espèces): "
+    );
+    const status = readlineSync.question(
+      "Entrez le statut du paiement (ex: payé, en attente): "
+    );
     if (isNaN(amount)) {
       throw new Error("Le montant doit être un nombre.");
     }
 
-    await paymentModule.addPayment(order_id, amount, payment_date, payment_method, status);
+    await paymentModule.addPayment(
+      order_id,
+      amount,
+      payment_date,
+      payment_method,
+      status
+    );
     console.log("Paiement ajouté avec succès !");
   } catch (error) {
     console.error("Erreur lors de l'ajout du paiement :", error.message);
@@ -530,18 +615,33 @@ async function listPayments() {
 
 async function updatePayment() {
   try {
-    const paymentId = readlineSync.question("Entrez l'ID du paiement à modifier : ");
+    const paymentId = readlineSync.question(
+      "Entrez l'ID du paiement à modifier : "
+    );
     const orderId = readlineSync.question("Entrez l'ID de la commande : ");
-    const date = readlineSync.question("Entrez la date du paiement (YYYY-MM-DD) : ");
-    const amount = parseFloat(readlineSync.question("Entrez le nouveau montant du paiement : "));
-    const paymentMethod = readlineSync.question("Entrez le mode de paiement : ");
+    const date = readlineSync.question(
+      "Entrez la date du paiement (YYYY-MM-DD) : "
+    );
+    const amount = parseFloat(
+      readlineSync.question("Entrez le nouveau montant du paiement : ")
+    );
+    const paymentMethod = readlineSync.question(
+      "Entrez le mode de paiement : "
+    );
     const status = readlineSync.question("Entrez le statut du paiement : ");
 
     if (isNaN(amount)) {
       throw new Error("Le montant doit être un nombre.");
     }
 
-    await paymentModule.updatePayment(paymentId, orderId, amount, date, paymentMethod, status );
+    await paymentModule.updatePayment(
+      paymentId,
+      orderId,
+      amount,
+      date,
+      paymentMethod,
+      status
+    );
     console.log("Paiement modifié avec succès !");
   } catch (error) {
     console.error(

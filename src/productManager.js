@@ -5,21 +5,36 @@ async function getProducts() {
     const [rows] = await connection.execute("SELECT * FROM products");
     return rows;
   } catch (error) {
-    console.error("Erreur lors de la récupération des produits :", error.message);
+    console.error(
+      "Erreur lors de la récupération des produits :",
+      error.message
+    );
     throw new Error("Erreur lors de la récupération des produits.");
   } finally {
     connection.release();
   }
 }
-async function addProduct(name, description, price, stock, category, barcode, status) {
+async function addProduct(
+  name,
+  description,
+  price,
+  stock,
+  category,
+  barcode,
+  status
+) {
   if (!name || price === undefined || stock === undefined) {
     throw new Error("Les champs nom, prix et stock sont obligatoires.");
   }
   if (isNaN(price) || isNaN(stock)) {
-    throw new Error("Le prix et la quantité en stock doivent être des nombres.");
+    throw new Error(
+      "Le prix et la quantité en stock doivent être des nombres."
+    );
   }
   if (price <= 0 || stock < 0) {
-    throw new Error("Le prix doit être supérieur à zéro et le stock ne peut pas être négatif.");
+    throw new Error(
+      "Le prix doit être supérieur à zéro et le stock ne peut pas être négatif."
+    );
   }
 
   const connection = await pool.getConnection();
@@ -36,16 +51,29 @@ async function addProduct(name, description, price, stock, category, barcode, st
     connection.release();
   }
 }
-async function updateProduct(id, name, description, price, stock, category, barcode, status) {
+async function updateProduct(
+  id,
+  name,
+  description,
+  price,
+  stock,
+  category,
+  barcode,
+  status
+) {
   // Validation des données
   if (!name || price === undefined || stock === undefined) {
     throw new Error("Les champs nom, prix et stock sont obligatoires.");
   }
   if (isNaN(price) || isNaN(stock)) {
-    throw new Error("Le prix et la quantité en stock doivent être des nombres.");
+    throw new Error(
+      "Le prix et la quantité en stock doivent être des nombres."
+    );
   }
   if (price <= 0 || stock < 0) {
-    throw new Error("Le prix doit être supérieur à zéro et le stock ne peut pas être négatif.");
+    throw new Error(
+      "Le prix doit être supérieur à zéro et le stock ne peut pas être négatif."
+    );
   }
 
   const connection = await pool.getConnection();
@@ -82,7 +110,9 @@ async function destroyProduct(id) {
     return result.affectedRows;
   } catch (error) {
     if (error.code && error.code === "ER_ROW_IS_REFERENCED_2") {
-      throw new Error(`Erreur de suppression : le produit ${id} est référencé dans d'autres enregistrements.`);
+      throw new Error(
+        `Erreur de suppression : le produit ${id} est référencé dans d'autres enregistrements.`
+      );
     }
     console.error("Erreur lors de la suppression du produit :", error.message);
     throw new Error("Erreur lors de la suppression du produit.");

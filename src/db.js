@@ -7,8 +7,8 @@ const connPool = mysql.createPool({
   database: "gestion_import_export",
   waitForConnections: true,
   connectionLimit: 2,
-  connectTimeout : false,
-  port : 3308,
+  connectTimeout: false,
+  port: 3306,
 });
 
 connPool.getConnection().then(() => {

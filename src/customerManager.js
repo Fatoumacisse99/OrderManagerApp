@@ -131,4 +131,4 @@ async function customerExists(id) {
   }
 }
 
-module.exports = { getCustomers, addCustomer, updateCustomer, destroyCustomer };
+module.exports = { getCustomers, addCustomer, updateCustomer, destroyCustomer, customerExists };
