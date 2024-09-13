@@ -65,18 +65,17 @@ Pour configurer correctement la base de données, vous devez ajuster les paramè
 
 Dans le fichier `src/db.js`, remplacez les valeurs par celles qui correspondent à votre configuration de base de données :
 
-```bash
-const mysql = require("mysql2/promise");
-
-  host: "localhost",                 // Adresse du serveur de base de données
-  user: "votre_nom_utilisateur",     // Remplacez 'root' par votre nom d'utilisateur
-  password: "votre_mot_de_passe",    // Remplacez '' par votre mot de passe
-  database: "gestion_import_export", // Nom de la base de données
-  port: 3306,                        // Remplacez 3306 par le port utilisé par votre base de données si différent
-});
 
 
-```
+  - host: "localhost": Adresse du serveur de base de données
+  - user: "votre_nom_utilisateur": Remplacez 'root' par votre nom d'utilisateur
+  - password : "votre_mot_de_passe":Remplacez '' par votre mot de passe
+  - database : "gestion_import_export":Nom de la base de données
+  - port: 3306 :Remplacez 3306 par le port utilisé par votre base de données si différent
+
+
+
+
 
 - Le fichier de configuration de la base de données est situé à l'emplacement suivant :
 

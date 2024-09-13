@@ -12,6 +12,6 @@ const connPool = mysql.createPool({
 });
 
 connPool.getConnection().then(() => {
-  console.log("CONNECTED");
+  // console.log("CONNECTED");
 });
 module.exports = connPool;

@@ -287,6 +287,7 @@ async function destroyOrderDetail(id) {
   }
 }
 
+
 module.exports = {
   getOrders,
   addOrder,

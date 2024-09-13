@@ -182,13 +182,8 @@ async function addOrderWithDetails() {
     const date = readlineSync.question(
       "Entrez la date de la commande (YYYY-MM-DD) : "
     );
-    let customer_id = readlineSync.question("ID du client: ");
-    // const customerExist = await customerModule.customerExists(customer_id);
-
-    // if (!customerExist) {
-    //   console.log("id client n'existe pas dans la base de donnée ");
-
-    // } else {
+    const customer_id = readlineSync.question("ID du client: ");
+  
     const delivery_address = readlineSync.question("Adresse de livraison: ");
     const track_number = readlineSync.question("Numéro de suivi: ");
     const status = readlineSync.question("Statut de la commande: ");
@@ -203,20 +198,10 @@ async function addOrderWithDetails() {
         "Tous les champs (date, customer_id, delivery_address, track_number, status) sont obligatoires."
       );
     }
-    // }
+
     if (isNaN(Date.parse(date))) {
       throw new Error("La date fournie n'est pas valide.");
     }
-    // const orderId = await orderModule.addOrder(
-    //   date,
-    //   customer_id,
-    //   delivery_address,
-    //   track_number,
-    //   status
-    // );
-    // console.log(
-    //   `Commande ajoutée avec succès ! ID de la commande : ${orderId}`
-    // );
     commande = {
       date,
       customer_id,
@@ -240,7 +225,7 @@ async function updateOrderWithDetails() {
     const customer_id = readlineSync.question(
       "Entrez le nouvel ID du client : "
     );
-    const delivery_address = readlineSync.question("Entrez la nouvelle adresse de livraison: ");
+    const delivery_address = readlineSync.question("Adresse de livraison: ");
     const date = readlineSync.question(
       "Entrez la nouvelle date de la commande (YYYY-MM-DD) : "
     );
@@ -318,7 +303,7 @@ async function manageOrderDetails(orderId) {
         break;
       case "2":
         await sauvegarderCommandeEtDetails();
-        // console.log("Détails de la commande sauvegardés !");
+         console.log("Détails de la commande sauvegardés !");
         break;
       case "0":
         commande = null;
@@ -347,10 +332,6 @@ async function addOrderDetails(orderId) {
       }
       detailsCommande.push({ productId, quantity });
       console.log("Détail de commande ajouté en mémoire !");
-
-      // await orderModule.addOrderDetail(orderId, productId, quantity);
-      // console.log("Détail de commande ajouté avec succès !");
-
       moreProducts = readlineSync.keyInYNStrict("Ajouter un autre produit ?");
     } catch (error) {
       console.error(
@@ -392,7 +373,7 @@ async function sauvegarderCommandeEtDetails() {
     commande = null;
     detailsCommande = [];
   } catch (error) {
-    // console.error("Erreur lors de la sauvegarde :", error.message);
+     console.error("Erreur lors de la sauvegarde :", error.message);
   }
 }
 
@@ -450,13 +431,13 @@ async function updateProduct() {
       "Entrez l'ID du produit à modifier : "
     );
     const name = readlineSync.question(
-      "Entrez le nouveau nom du produit : "
+      "Entrez le nouveau nom du produit  : "
     );
     const description = readlineSync.question(
-      "Entrez la nouvelle description du produit : "
+      "Entrez la nouvelle description du produit  : "
     );
     const price = readlineSync.question(
-      "Entrez le nouveau prix du produit : "
+      "Entrez le nouveau prix du produit  : "
     );
     const stock = readlineSync.question(
       "Entrez la nouvelle quantité en stock du produit : "
@@ -465,7 +446,7 @@ async function updateProduct() {
       "Entrez la nouvelle catégorie du produit : "
     );
     const barcode = readlineSync.question(
-      "Entrez le nouveau code-barres du produit : "
+      "Entrez le nouveau code-barres du produit  : "
     );
     const status = readlineSync.question(
       "Entrez le nouveau statut du produit : "
@@ -533,16 +514,16 @@ async function updateCustomer() {
       "Entrez l'ID du client à modifier : "
     );
     const name = readlineSync.question(
-      "Entrez le nouveau nom du client : "
+      "Entrez le nouveau nom du client (laisser vide pour ne pas changer) : "
     );
     const email = readlineSync.question(
-      "Entrez le nouvel email du client : "
+      "Entrez le nouvel email du client (laisser vide pour ne pas changer) : "
     );
     const phone = readlineSync.question(
-      "Entrez le nouveau numéro de téléphone du client  : "
+      "Entrez le nouveau numéro de téléphone du client (laisser vide pour ne pas changer) : "
     );
     const address = readlineSync.question(
-      "Entrez la nouvelle adresse du client : "
+      "Entrez la nouvelle adresse du client (laisser vide pour ne pas changer) : "
     );
 
     await customerModule.updateCustomer(
