@@ -3,6 +3,7 @@ const customerModule = require("./customerManager");
 const paymentModule = require("./paymentManager");
 const orderModule = require("./orderManager");
 const readlineSync = require("readline-sync");
+const pool = require("./db");
 let commande = null;
 let detailsCommande = [];
 
@@ -316,28 +317,41 @@ async function manageOrderDetails(orderId) {
     }
   } while (choix !== "0");
 }
-
+async function isProductExists(productId) {
+  const [rows] = await pool.execute('SELECT COUNT(*) as count FROM products WHERE id = ?', [productId]);
+  return rows[0].count > 0;
+}
 async function addOrderDetails(orderId) {
   let moreProducts = true;
   while (moreProducts) {
     try {
       const productId = readlineSync.question("Entrez l'ID du produit : ");
+      
+      // Vérification de l'existence du produit
+      const productExists = await isProductExists(productId);
+      if (!productExists) {
+        throw new Error("Le produit avec cet ID n'existe pas.");
+      }
+
       const quantity = parseInt(
         readlineSync.question("Entrez la quantité : "),
         10
       );
+      const price = parseInt(
+        readlineSync.question("Entrez le prix : "),
+        10
+      );
 
-      if (isNaN(quantity)) {
-        throw new Error("La quantité doit être un nombre.");
+      if (isNaN(quantity) || isNaN(price)) {
+        throw new Error("La quantité et le prix doivent être des nombres valides.");
       }
-      detailsCommande.push({ productId, quantity });
+
+      // Ajout des détails de la commande en mémoire
+      detailsCommande.push({ productId, quantity, price });
       console.log("Détail de commande ajouté en mémoire !");
       moreProducts = readlineSync.keyInYNStrict("Ajouter un autre produit ?");
     } catch (error) {
-      console.error(
-        "Erreur lors de l'ajout du détail de commande :",
-        error.message
-      );
+      console.error("Erreur lors de l'ajout du détail de commande :", error.message);
     }
   }
 }
@@ -345,7 +359,7 @@ async function sauvegarderCommandeEtDetails() {
   try {
     if (!commande || detailsCommande.length === 0) {
       console.log("Aucune commande ou aucun détail à sauvegarder.");
-      return;
+      // return;
     }
 
     // Insérer la commande dans la base de données
@@ -362,18 +376,18 @@ async function sauvegarderCommandeEtDetails() {
       await orderModule.addOrderDetail(
         orderId,
         detail.productId,
-        detail.quantity
+        detail.quantity,
+        detail.price
       );
     }
 
-    console.log(
-      "Commande et détails sauvegardés avec succès dans la base de données !"
-    );
+    console.log("Commande et détails sauvegardés avec succès dans la base de données !");
+    
     // Réinitialiser les données après sauvegarde
     commande = null;
     detailsCommande = [];
   } catch (error) {
-     console.error("Erreur lors de la sauvegarde :", error.message);
+    console.error("Erreur lors de la sauvegarde :", error.message);
   }
 }
 
@@ -431,13 +445,13 @@ async function updateProduct() {
       "Entrez l'ID du produit à modifier : "
     );
     const name = readlineSync.question(
-      "Entrez le nouveau nom du produit  : "
+      "Entrez le nouveau nom du produit : "
     );
     const description = readlineSync.question(
-      "Entrez la nouvelle description du produit  : "
+      "Entrez la nouvelle description du produit : "
     );
     const price = readlineSync.question(
-      "Entrez le nouveau prix du produit  : "
+      "Entrez le nouveau prix du produit : "
     );
     const stock = readlineSync.question(
       "Entrez la nouvelle quantité en stock du produit : "
@@ -446,7 +460,7 @@ async function updateProduct() {
       "Entrez la nouvelle catégorie du produit : "
     );
     const barcode = readlineSync.question(
-      "Entrez le nouveau code-barres du produit  : "
+      "Entrez le nouveau code-barres du produit : "
     );
     const status = readlineSync.question(
       "Entrez le nouveau statut du produit : "
@@ -514,16 +528,16 @@ async function updateCustomer() {
       "Entrez l'ID du client à modifier : "
     );
     const name = readlineSync.question(
-      "Entrez le nouveau nom du client (laisser vide pour ne pas changer) : "
+      "Entrez le nouveau nom du client : "
     );
     const email = readlineSync.question(
-      "Entrez le nouvel email du client (laisser vide pour ne pas changer) : "
+      "Entrez le nouvel email du client : "
     );
     const phone = readlineSync.question(
-      "Entrez le nouveau numéro de téléphone du client (laisser vide pour ne pas changer) : "
+      "Entrez le nouveau numéro de téléphone du client: "
     );
     const address = readlineSync.question(
-      "Entrez la nouvelle adresse du client (laisser vide pour ne pas changer) : "
+      "Entrez la nouvelle adresse du client : "
     );
 
     await customerModule.updateCustomer(
